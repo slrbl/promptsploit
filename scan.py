@@ -1,5 +1,6 @@
 import configparser
 import requests
+import yaml
 
 
 def scan(rules,config):
@@ -49,6 +50,10 @@ def main():
     config.read('settings.conf')
     
     # Load rules 
+    # Load rules from YAML
+    with open('rules.yaml', 'r') as f:
+        rules = yaml.safe_load(f)
+    """    
     rules=[
         {
             'OWASP':'LLM09:2025 Misinformation',
@@ -72,6 +77,7 @@ def main():
             'pass_answer':'no'
         }
     ]
+    """
     scan(rules,config)
     print("\n\n\n\n")
     
