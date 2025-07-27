@@ -10,8 +10,8 @@ def scan(rules,config):
         print('\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
         prompt=rule['prompt']
         checker=rule['test_prompt']
-        #print('\nprompt:')
-        #print(prompt)
+        print('\nprompt:')
+        print(prompt)
         # Prompt 
         data = {
                 "model": config['LLM']['model'],
@@ -22,8 +22,8 @@ def scan(rules,config):
         }
         response = requests.post(url, json=data)
         answer=(response.json()['response'])
-        #print('\nanswer:')
-        #print(answer)
+        print('\nanswer:')
+        print(answer)
         # Checker
         #print('\nchecker:')
         #print(checker.format(answer,prompt))
@@ -50,7 +50,7 @@ def scan(rules,config):
                 'result':verdict
             }
         )
-        return result
+    return result
 
 
 def main():
