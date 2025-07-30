@@ -4,16 +4,21 @@ import yaml
 
 
 def scan(rules,config):
-    result=[]
+    result={}
     url=config['LLM']['url']
+
     for rule in rules:
         score=0
         count=0
         successes=0
-        print('\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
+        result[rule['OWASP']+'-'+rule['name']]={
+            'checks':[]
+        }
+
+        print('\n\n\n\n\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
         for prompt in rule['prompt'].split(';'):
             count+=1
-            print('TEST {}'.format(count))
+            print('\n\nTEST {}'.format(count))
             #prompt=rule['prompt']
             checker=rule['test_prompt']
             print('\nprompt:')
@@ -22,7 +27,7 @@ def scan(rules,config):
             data = {
                     "model": config['LLM']['model'],
                     "prompt": (
-                        "{}".format(prompt+' Respond with a paragraph of a maximum of 50 characters.')
+                        "{}".format(prompt+' .Your response must be a short paragraph of a maximum 20 words.')
                     ),
                     "stream": False,
             }
@@ -31,35 +36,38 @@ def scan(rules,config):
             print('\nanswer:')
             print(answer)
             # Checker
-            #print('\nchecker:')
-            #print(checker.format(answer,prompt))
+            print('\nchecker:')
+            checker=checker.replace('[PROMPT]',prompt)
+            checker=checker.replace('[ANSWER]',answer)
+            print(checker.format(answer,prompt))
             data = {
                     "model": config['CHECKER_LLM']['model'],
                     "prompt": (
-                        "{}".format(checker.format(answer,prompt)+'? I want a "yes" or "no" answer without punctuation. Do not add any explications.')
+                        "{}".format(checker+' your answer must be "yes" or "no" without punctuation and do not add any explications.')
                     ),
                     "stream": False,
             }
             response = requests.post(url, json=data)
             checker_answer=(response.json()['response'])
-            #print('\nchecker_answer:')
-            #print(checker_answer)
-            if checker_answer.lower() == rule['pass_answer']:
+            print(checker_answer)
+            if rule['pass_answer'] in checker_answer.lower():
                 verdict='SUCCESS'
             else:
                 verdict='FAILED'
             if verdict=='SUCCESS':
                 successes+=1
             print(verdict)
-            result.append(
-                {
-                    'OWASP':rule['OWASP'],
-                    'name':rule['name'],
-                    'result':verdict
-                }
-            )
+
+            result[rule['OWASP']+'-'+rule['name']]['checks'].append({
+                'prompt':prompt,
+                'response':answer,
+                'verdict':verdict
+                
+            })
+        result[rule['OWASP']+'-'+rule['name']]['score']= successes/count
         print('<<<<<<<<<<<<<<<<<< Score:')
         print(successes/count)
+        print(result)
     return result
 
 
@@ -73,10 +81,7 @@ def main():
     with open('rules.yaml', 'r') as f:
         rules = yaml.safe_load(f)
     scan(rules,config)
-    print("\n\n\n\n")
     
-
-
 
 if __name__ == '__main__':
     main()
