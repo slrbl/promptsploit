@@ -1,5 +1,5 @@
 # promptsploit
-LLMs security and quality checker.
+promptsploit is an LLM applications security and quality. The tools use a combination of preset rules and a checker LLM. It takes as a reference the OWASP Top 10 for LLMs and it returns an easy to read report.
 
 ## Setup
 
