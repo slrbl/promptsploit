@@ -7,6 +7,7 @@ import logging
 
 
 def query_llm(config,llm,prompt):
+    # Make a prompt and get a response
     data = {
         "model": config[llm]['name'],
         "prompt": (
@@ -17,14 +18,15 @@ def query_llm(config,llm,prompt):
     try:
         response = requests.post(config[llm]['url'], json=data, timeout=20)
         response.raise_for_status()
-        answer = response.json().get('response', '')
+        response = response.json().get('response', '')
     except (requests.RequestException, ValueError) as e:
         logging.info(f"Error querying LLM: {e}")
         sys.exit(1)
-    return answer
+    return response
 
 
 def scan(rules,config,tested_llm,checker_llm):
+    # Scan an LLM using the rules defined in rules.yaml
     print('> Your model is being tested for OWASP LLM vulnerabilities, please wait..')
 
     result={'model':config[tested_llm]['name']}
@@ -84,6 +86,7 @@ def scan(rules,config,tested_llm,checker_llm):
 
 
 def get_report(data):
+    # Generates a HTML report 
     with open("template.html", "r") as f:
         report_template=f.read()
     tables=""
@@ -91,8 +94,7 @@ def get_report(data):
     for key in data:
         if key in ['model','general_score']:
             continue
-        owasp=key
-        tables+="<h3>{}</h3>".format(owasp)
+        tables+="<h3>{}</h3>".format(key)
         tables+="""<table><thead><tr>
                 <th width="45%">Prompt</th>
                 <th width="45%">Response</th>
@@ -120,8 +122,8 @@ def get_report(data):
         f.write(report)
 
 
-
 def get_args():
+    # Get the script args
     parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
     parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
     parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM', default='llama3.2')
@@ -129,16 +131,16 @@ def get_args():
     return parser.parse_args()
 
 
-
-
-
-def main():
-    
+def get_config():
     # Load settings 
     config = configparser.ConfigParser()
     config.sections()
     config.read('settings.conf')
 
+
+def main():
+    
+    get_config()
     args = get_args()
 
     if args.logging_level != 'OFF':
