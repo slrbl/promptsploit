@@ -3,7 +3,7 @@ promptsploit is a tool for assessing the security and quality of LLM application
 
 ## How does it work
 
-<center><img src='IMAGES/flowchart.png' width="80%"/></center>
+<center><img src='IMAGES/flowchart.png'/></center>
 
 ## Setup
 
@@ -38,4 +38,4 @@ url:http://localhost:11434/api/generate
 ## Report 
 The following is an example of a prompsploit report for nuextract model
 
-<center><img src='IMAGES/promptsploit_report_example.png'/></center>
+<center><img src='IMAGES/promptsploit_report_example.png' width="50%"/></center>
