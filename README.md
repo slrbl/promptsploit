@@ -1,6 +1,8 @@
 # promptsploit
 promptsploit is a tool for assessing the security and quality of LLM applications. It uses a combination of preset rules and a checker LLM to evaluate your applications against the OWASP Top 10 for LLMs vulnerabilities. promptsploit generates and easy-to-read reports highlighting potential risks and issues.
 
+## How does it work
+
 <center><img src='IMAGES/flowchart.png' width="80%"/></center>
 
 ## Setup
@@ -32,3 +34,8 @@ url:http://localhost:11434/api/generate
 name:llama3.2
 url:http://localhost:11434/api/generate
 ```
+
+## Report 
+The following is an example of a prompsploit report for nuextract model
+
+<center><img src='IMAGES/promptsploit_report_example.png' width="80%"/></center>
