@@ -139,10 +139,11 @@ def get_config():
 
 
 def main():
-    
+    # Getting args and config 
     get_config()
     args = get_args()
 
+    # Setting logging level
     if args.logging_level != 'OFF':
         if args.logging_level == 'INFO':
             level=logging.INFO
@@ -157,7 +158,10 @@ def main():
     with open('rules.yaml', 'r') as f:
         rules = yaml.safe_load(f)
 
+    # Launching the scan 
     result = scan(rules,config,args.tested_llm,args.checker_llm)
+
+    # Generating the HTML report
     get_report(result)
 
 

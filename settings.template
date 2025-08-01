@@ -1,8 +1,9 @@
-[LLM]
+[mistral]
+name:mistral
 url:http://localhost:11434/api/generate
-model:mistral
+token:
 
-
-[CHECKER_LLM]
+[llama3.2]
+name:llama3.2
 url:http://localhost:11434/api/generate
-model:llama3.2
+token:
