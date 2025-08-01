@@ -16,7 +16,7 @@ def query_llm(config,llm,prompt):
         "stream": False,
     }
     try:
-        response = requests.post(config[llm]['url'], json=data, timeout=20)
+        response = requests.post(config[llm]['url'], json=data, timeout=60)
         response.raise_for_status()
         response = response.json().get('response', '')
     except (requests.RequestException, ValueError) as e:
@@ -139,8 +139,13 @@ def get_config():
 
 
 def main():
-    # Getting args and config 
-    get_config()
+
+    # Getting config 
+    config = configparser.ConfigParser()
+    config.sections()
+    config.read('settings.conf')
+
+    # Getting args
     args = get_args()
 
     # Setting logging level
