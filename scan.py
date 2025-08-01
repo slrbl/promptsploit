@@ -1,16 +1,16 @@
 import configparser
 import requests
 import yaml
-import json
+import argparse
 
-def scan(rules,config):
-    result={'model':config['LLM']['model']}
-    url=config['LLM']['url']
+def scan(rules,config,tested_llm,checker_llm):
+
+    result={'model':config[tested_llm]['name']}
+
     general_count=0
     general_passes=0.
     for rule in rules:
         
-        score=0
         count=0
         passes=0
         result[rule['OWASP']+'-'+rule['name']]={
@@ -21,20 +21,20 @@ def scan(rules,config):
         for prompt in rule['prompt'].split(';'):
             general_count+=1
             count+=1
-            print('\nTEST {}'.format(count))
+            print('\n\nTEST {}'.format(count))
             #prompt=rule['prompt']
             checker=rule['test_prompt']
             print('\nprompt:')
             print(prompt)
             # Prompt 
             data = {
-                    "model": config['LLM']['model'],
+                    "model": config[tested_llm]['name'],
                     "prompt": (
                         "{}".format(prompt+' .Your response must be a short paragraph of a maximum 20 words.')
                     ),
                     "stream": False,
             }
-            response = requests.post(url, json=data)
+            response = requests.post(config[tested_llm]['url'], json=data)
             answer=(response.json()['response'])
             print('\nanswer:')
             print(answer)
@@ -44,13 +44,13 @@ def scan(rules,config):
             checker=checker.replace('[ANSWER]',answer)
             print(checker.format(answer,prompt))
             data = {
-                    "model": config['CHECKER_LLM']['model'],
+                    "model": config[checker_llm]['name'],
                     "prompt": (
-                        "{}".format(checker+' your answer must be "yes" or "no" without punctuation and do not add any explications.')
+                        "{}".format(checker+'\nYou must answer with only one word: "yes" or "no".')
                     ),
                     "stream": False,
             }
-            response = requests.post(url, json=data)
+            response = requests.post(config[checker_llm]['url'], json=data)
             checker_answer=(response.json()['response'])
             print('\n Checker response:{}'.format(checker_answer))
             if rule['pass_answer'] in checker_answer.lower():
@@ -114,16 +114,29 @@ def get_report(data):
 
 
 
+def get_args():
+    parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
+    parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
+    parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM', default='llama3.2')
+    return parser.parse_args()
+
+
+
+
+
 def main():
     # Load settings 
     config = configparser.ConfigParser()
     config.sections()
     config.read('settings.conf')
-    
+
+    args = get_args()
+
     # Load rules from YAML
     with open('rules.yaml', 'r') as f:
         rules = yaml.safe_load(f)
-    result = scan(rules,config)
+
+    result = scan(rules,config,args.tested_llm,args.checker_llm)
     get_report(result)
 
 
