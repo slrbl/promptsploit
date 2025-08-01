@@ -1,7 +1,7 @@
 # promptsploit
-promptsploit is a tool for assessing the security and quality of LLM applications. It uses a combination of preset rules and a checker LLM to evaluate your applications. Based on the OWASP Top 10 for LLMs, promptsploit generates easy-to-read reports highlighting potential risks and issues.
+promptsploit is a tool for assessing the security and quality of LLM applications. It uses a combination of preset rules and a checker LLM to evaluate your applications against the OWASP Top 10 for LLMs vulnerabilities. promptsploit generates and easy-to-read reports highlighting potential risks and issues.
 
-<center><img src='IMAGES/flowchart.png' width="80%"/></center>center
+<center><img src='IMAGES/flowchart.png' width="80%"/></center>
 
 ## Setup
 
