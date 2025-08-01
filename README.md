@@ -1,6 +1,5 @@
 # promptsploit
-LLMs security and quality checker.
-
+promptsploit is a tool for assessing the security and quality of LLM applications. It uses a combination of preset rules and a checker LLM to evaluate your applications. Based on the OWASP Top 10 for LLMs, promptsploit generates easy-to-read reports highlighting potential risks and issues.
 ## Setup
 
 ### Using a Python virtual env
