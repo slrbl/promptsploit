@@ -1,3 +1,4 @@
 settings.conf
 *.html
+.DS_Store
 
