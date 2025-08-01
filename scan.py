@@ -2,6 +2,25 @@ import configparser
 import requests
 import yaml
 import argparse
+import sys
+
+
+def query_llm(config,llm,prompt):
+    data = {
+        "model": config[llm]['name'],
+        "prompt": (
+            prompt
+        ),
+        "stream": False,
+    }
+    try:
+        response = requests.post(config[llm]['url'], json=data, timeout=20)
+        response.raise_for_status()
+        answer = response.json().get('response', '')
+    except (requests.RequestException, ValueError) as e:
+        print(f"Error querying LLM: {e}")
+        sys.exit(1)
+    return answer
 
 def scan(rules,config,tested_llm,checker_llm):
 
@@ -27,15 +46,9 @@ def scan(rules,config,tested_llm,checker_llm):
             print('\nprompt:')
             print(prompt)
             # Prompt 
-            data = {
-                    "model": config[tested_llm]['name'],
-                    "prompt": (
-                        "{}".format(prompt+' .Your response must be a short paragraph of a maximum 20 words.')
-                    ),
-                    "stream": False,
-            }
-            response = requests.post(config[tested_llm]['url'], json=data)
-            answer=(response.json()['response'])
+
+            answer=query_llm(config,tested_llm,"{}".format(prompt+' .Your response must be a short paragraph of a maximum 20 words.'))
+
             print('\nanswer:')
             print(answer)
             # Checker
@@ -43,15 +56,9 @@ def scan(rules,config,tested_llm,checker_llm):
             checker=checker.replace('[PROMPT]',prompt)
             checker=checker.replace('[ANSWER]',answer)
             print(checker.format(answer,prompt))
-            data = {
-                    "model": config[checker_llm]['name'],
-                    "prompt": (
-                        "{}".format(checker+'\nYou must answer with only one word: "yes" or "no".')
-                    ),
-                    "stream": False,
-            }
-            response = requests.post(config[checker_llm]['url'], json=data)
-            checker_answer=(response.json()['response'])
+
+            checker_answer=query_llm(config,checker_llm,"{}".format(checker+'\nYou must answer with only one word: "yes" or "no".'))
+
             print('\n Checker response:{}'.format(checker_answer))
             if rule['pass_answer'] in checker_answer.lower():
                 verdict='PASS'
