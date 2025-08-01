@@ -3,6 +3,7 @@ import requests
 import yaml
 import argparse
 import sys
+import logging
 
 
 def query_llm(config,llm,prompt):
@@ -18,11 +19,13 @@ def query_llm(config,llm,prompt):
         response.raise_for_status()
         answer = response.json().get('response', '')
     except (requests.RequestException, ValueError) as e:
-        print(f"Error querying LLM: {e}")
+        logging.info(f"Error querying LLM: {e}")
         sys.exit(1)
     return answer
 
+
 def scan(rules,config,tested_llm,checker_llm):
+    print('> Your model is being tested for OWASP LLM vulnerabilities, please wait..')
 
     result={'model':config[tested_llm]['name']}
 
@@ -36,30 +39,28 @@ def scan(rules,config,tested_llm,checker_llm):
             'checks':[]
         }
 
-        print('\n\n\n\n\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
+        logging.info('\n\n\n\n\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
         for prompt in rule['prompt'].split(';'):
             general_count+=1
             count+=1
-            print('\n\nTEST {}'.format(count))
-            #prompt=rule['prompt']
+            logging.info('\n\nTEST {}'.format(count))
             checker=rule['test_prompt']
-            print('\nprompt:')
-            print(prompt)
-            # Prompt 
+            logging.info('\nprompt:')
+            logging.info(prompt)
 
             answer=query_llm(config,tested_llm,"{}".format(prompt+' .Your response must be a short paragraph of a maximum 20 words.'))
 
-            print('\nanswer:')
-            print(answer)
+            logging.info('\nanswer:')
+            logging.info(answer)
             # Checker
-            print('\nchecker:')
+            logging.info('\nchecker:')
             checker=checker.replace('[PROMPT]',prompt)
             checker=checker.replace('[ANSWER]',answer)
-            print(checker.format(answer,prompt))
+            logging.info(checker.format(answer,prompt))
 
             checker_answer=query_llm(config,checker_llm,"{}".format(checker+'\nYou must answer with only one word: "yes" or "no".'))
 
-            print('\n Checker response:{}'.format(checker_answer))
+            logging.info('\n Checker response:{}'.format(checker_answer))
             if rule['pass_answer'] in checker_answer.lower():
                 verdict='PASS'
             else:
@@ -67,7 +68,7 @@ def scan(rules,config,tested_llm,checker_llm):
             if verdict=='PASS':
                 passes+=1
                 general_passes+=1
-            print(verdict)
+            logging.info(verdict)
 
             result[rule['OWASP']+'-'+rule['name']]['checks'].append({
                 'prompt':prompt,
@@ -76,9 +77,8 @@ def scan(rules,config,tested_llm,checker_llm):
                 
             })
         result[rule['OWASP']+'-'+rule['name']]['score']= passes/count
-        print('<<<<<<<<<<<<<<<<<< Score:')
-        print(passes/count)
-        print(result)
+        logging.info('Score:{}'.format(passes/count))
+        logging.info(result)
     result['general_score']=general_passes/general_count
     return result
 
@@ -87,7 +87,7 @@ def get_report(data):
     with open("template.html", "r") as f:
         report_template=f.read()
     tables=""
-    tables+="<h3>Genral score: {}</h3>".format(round(data['general_score'],2))
+    tables+="<h3>General score: {}</h3>".format(round(data['general_score'],2))
     for key in data:
         if key in ['model','general_score']:
             continue
@@ -125,6 +125,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
     parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
     parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM', default='llama3.2')
+    parser.add_argument('-l', '--logging_level', help = 'The level of log: OFF, INFO or DEBUG', default='INFO')
     return parser.parse_args()
 
 
@@ -132,12 +133,23 @@ def get_args():
 
 
 def main():
+    
     # Load settings 
     config = configparser.ConfigParser()
     config.sections()
     config.read('settings.conf')
 
     args = get_args()
+
+    if args.logging_level != 'OFF':
+        if args.logging_level == 'INFO':
+            level=logging.INFO
+        elif args.logging_level == 'DEBUG':
+            level=logging.DEBUG
+        logging.basicConfig(
+            level=logging.DEBUG,  # Use DEBUG for more detailed output
+            format='%(asctime)s - %(levelname)s - %(message)s'
+            )
 
     # Load rules from YAML
     with open('rules.yaml', 'r') as f:
