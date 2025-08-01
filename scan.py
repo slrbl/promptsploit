@@ -118,7 +118,7 @@ def get_report(data):
     for key,value in [["[TABLE]",tables],["[MODEL]",data['model']]]:
         report=report.replace(key,value)
 
-    with open("report_{}.html".format(data['model']), "w") as f:
+    with open("./REPORTS/report_{}.html".format(data['model']), "w") as f:
         f.write(report)
 
 
