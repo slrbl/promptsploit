@@ -136,7 +136,7 @@ def get_args():
     # Get the script args
     parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
     parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
-    parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM', default='llama3.2')
+    parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM (llama3.2 by default)', default='llama3.2')
     parser.add_argument('-l', '--logging_level', help = 'The level of log: OFF, INFO or DEBUG', default='INFO')
     return parser.parse_args()
 
