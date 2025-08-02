@@ -1,9 +1,15 @@
+# Promptsploit v1 02/08/2025
+# Author: walid.daboubi@gmail.com
+
+
 import configparser
 import requests
 import yaml
 import argparse
 import sys
 import logging
+import secrets
+import random
 
 
 def query_llm(config,llm,prompt):
@@ -87,7 +93,7 @@ def scan(rules,config,tested_llm,checker_llm):
 
 def get_report(data):
     # Generates a HTML report 
-    with open("template.html", "r") as f:
+    with open("TEMPLATES/report_template.html", "r") as f:
         report_template=f.read()
     tables=""
     tables+="<h3>General score: {}</h3>".format(round(data['general_score'],2))
@@ -118,7 +124,11 @@ def get_report(data):
     for key,value in [["[TABLE]",tables],["[MODEL]",data['model']]]:
         report=report.replace(key,value)
 
-    with open("./REPORTS/report_{}.html".format(data['model']), "w") as f:
+    # Creating a random report id
+    characters = 'abcdefghijklmnopqrstuvwxyz'
+    report_id = ''.join(random.choices(characters, k=12))
+
+    with open("./REPORTS/report_{}_{}.html".format(data['model'],report_id), "w") as f:
         f.write(report)
 
 
@@ -160,7 +170,7 @@ def main():
             )
 
     # Load rules from YAML
-    with open('rules.yaml', 'r') as f:
+    with open('./RULES/owasp_top_10_for_llms.yaml', 'r') as f:
         rules = yaml.safe_load(f)
 
     # Launching the scan 

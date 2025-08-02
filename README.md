@@ -19,6 +19,21 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+### Settings file
+Copy settings.template to settings.conf and adjust it according to your needs.
+You can also create a new settings file as in the following example:
+```shell
+[mistral]
+name:mistral
+url:http://localhost:11434/api/generate
+token:
+
+[llama3.2]
+name:llama3.2
+url:http://localhost:11434/api/generate
+token:
+```
+
 ## Usage
 You can use promptsploit as showed in below example:
 ```shell
