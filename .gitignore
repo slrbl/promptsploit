@@ -1,5 +1,5 @@
 settings.conf
-*.html
+/*.html
 .DS_Store
 REPORTS/*
 
