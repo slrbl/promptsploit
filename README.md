@@ -37,7 +37,7 @@ token:
 ## Usage
 You can use promptsploit as showed in below example:
 ```shell
-python scan.py -m mistral -l OFF 
+python promptsploit.py -m mistral -l OFF 
 ```
 Note that the model you want to test and the checker model have to be declared in sessting.conf, here is an example:
 ```shell
