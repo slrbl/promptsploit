@@ -35,7 +35,24 @@ token:
 ```
 
 ## Usage
-You can use promptsploit as showed in below example:
+
+```shell
+python promptsploit.py -h       
+usage: promptsploit.py [-h] -m TESTED_LLM [-c CHECKER_LLM] [-l LOGGING_LEVEL]
+
+Promptsploit help you check your LLM
+
+options:
+  -h, --help            show this help message and exit
+  -m, --tested_llm TESTED_LLM
+                        The LLM you want to assess for security vulnerabilities
+  -c, --checker_llm CHECKER_LLM
+                        The LLM which will assess the responses of the tested LLM (llama3.2 by default)
+  -l, --logging_level LOGGING_LEVEL
+                        The level of log: OFF, INFO or DEBUG
+```
+
+This is an example of testing mistral model
 ```shell
 python promptsploit.py -m mistral -l OFF 
 ```
