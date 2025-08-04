@@ -14,13 +14,20 @@ import random
 
 def query_llm(config,llm,prompt):
     # Make a prompt and get a response
+
     data = {
-        "model": config[llm]['name'],
+        "model": llm,
         "prompt": (
             prompt
         ),
         "stream": False,
     }
+    try:
+        url=config[llm]['url']
+    except: 
+        logging.info(f"URL not found for {llm}. Make sure that this LLM has been added to yout config file.")
+        sys.exit(1)
+
     try:
         response = requests.post(config[llm]['url'], json=data, timeout=60)
         response.raise_for_status()
@@ -31,11 +38,12 @@ def query_llm(config,llm,prompt):
     return response
 
 
+
 def scan(rules,config,tested_llm,checker_llm):
     # Scan an LLM using the rules defined in rules.yaml
     print('> Your model is being tested for OWASP LLM vulnerabilities, please wait..')
 
-    result={'model':config[tested_llm]['name']}
+    result={'model':tested_llm}
 
     general_count=0
     general_passes=0.
