@@ -8,8 +8,8 @@ import yaml
 import argparse
 import sys
 import logging
-import secrets
 import random
+import subprocess
 
 
 def query_llm(config,llm,prompt):
@@ -39,7 +39,7 @@ def query_llm(config,llm,prompt):
 
 
 
-def scan(rules,config,tested_llm,checker_llm):
+def scan(rules,config,tested_llm,checker_llm,owasp_category):
     # Scan an LLM using the rules defined in rules.yaml
     print('> Your model is being tested for OWASP LLM vulnerabilities, please wait..')
 
@@ -47,8 +47,18 @@ def scan(rules,config,tested_llm,checker_llm):
 
     general_count=0
     general_passes=0.
-    for rule in rules:
-        
+
+    # Filter rules if a specific category is selected by user 
+    active_rules=rules
+    if owasp_category!='All':
+        active_rules=[]
+        for rule in rules:
+            if rule['OWASP']==owasp_category:
+                active_rules.append(rule)
+                break
+    
+    for rule in active_rules:
+
         count=0
         passes=0
         result[rule['OWASP']+'-'+rule['name']]={
@@ -136,8 +146,11 @@ def get_report(data):
     characters = 'abcdefghijklmnopqrstuvwxyz'
     report_id = ''.join(random.choices(characters, k=12))
 
-    with open("./REPORTS/report_{}_{}.html".format(data['model'],report_id), "w") as f:
+    report_file_path="./REPORTS/report_{}_{}.html".format(data['model'],report_id)
+    with open(report_file_path, "w") as f:
         f.write(report)
+
+    return report_file_path
 
 
 def get_args():
@@ -145,6 +158,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
     parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
     parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM (llama3.2 by default)', default='llama3.2')
+    parser.add_argument('-o', '--owasp__llm_category', help = 'Scan for a specific OWASP for LLM category', default='All')
     parser.add_argument('-l', '--logging_level', help = 'The level of log: OFF, INFO or DEBUG', default='INFO')
     return parser.parse_args()
 
@@ -182,10 +196,13 @@ def main():
         rules = yaml.safe_load(f)
 
     # Launching the scan 
-    result = scan(rules,config,args.tested_llm,args.checker_llm)
+    result = scan(rules,config,args.tested_llm,args.checker_llm,args.owasp__llm_category)
 
-    # Generating the HTML report
-    get_report(result)
+    # Generating a HTML report
+    report_file_path=get_report(result)
+
+    # open the report 
+    subprocess.run(["open", report_file_path])
 
 
 if __name__ == '__main__':
