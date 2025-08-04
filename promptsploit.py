@@ -55,7 +55,7 @@ def scan(rules,config,tested_llm,checker_llm):
             'checks':[]
         }
 
-        logging.info('\n\n\n\n\n\n************************ {} - {} ************************'.format(rule['OWASP'],rule['name']))
+        logging.info('\n\n\n************************ {} - {} ************************\n\n\n'.format(rule['OWASP'],rule['name']))
         for prompt in rule['prompt'].split(';'):
             general_count+=1
             count+=1
