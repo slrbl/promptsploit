@@ -153,6 +153,65 @@ def get_report(data):
     return report_file_path
 
 
+
+def get_compare_report(multiple_result_data):
+    # Generates a HTML report 
+    with open("TEMPLATES/report_template.html", "r") as f:
+        report_template=f.read()
+
+    tables=""
+    for data in multiple_result_data:
+        tables+="<h3>General score for {}: {}</h3>".format(data['model'],round(data['general_score'],2))
+    
+
+
+    for key in multiple_result_data[0]:
+        if key in ['model','general_score']:
+            continue
+        tables+="<h3>{}</h3>".format(key)
+        tables+="""<table><thead><tr>
+                <th width="30%">Prompt</th>
+                <th width="30%">{} Response</th>
+                <th width="10%">Verdict</th>
+                <th width="30%">{} Response</th>
+                <th width="10%">Verdict</th>
+                </tr>
+                </thead>
+                <tbody>""".format(multiple_result_data[0]['model'],multiple_result_data[1]['model'])
+        details_llm_1=multiple_result_data[0][key]
+        details_llm_2=multiple_result_data[1][key]
+
+        checks_llm_1=details_llm_1['checks']
+        checks_llm_2=details_llm_2['checks']
+
+        for check1,check2 in zip(checks_llm_1,checks_llm_2):
+            tables+="<tr>"
+            tables+="<td>{}</td>".format(check1['prompt'])
+            tables+="<td>{}</td>".format(check1['response'])
+            tables+="<td class='result-{}'>{}</td>".format(check1['verdict'],check1['verdict'])
+            tables+="<td>{}</td>".format(check2['response'])
+            tables+="<td class='result-{}'>{}</td>".format(check2['verdict'],check2['verdict'])
+            tables+="</tr>"
+        tables+="</tbody></table>"
+        tables+="<h4>Score:{}</h4>".format(details_llm_1['score'])
+        tables+="<h4>Score:{}</h4>".format(details_llm_2['score'])
+        tables+="<br><br>"
+
+    report=report_template
+    for key,value in [["[TABLE]",tables],["[MODEL]",'{} v/s {}'.format(multiple_result_data[0]['model'],multiple_result_data[1]['model'])]]:
+        report=report.replace(key,value)
+
+    # Creating a random report id
+    characters = 'abcdefghijklmnopqrstuvwxyz'
+    report_id = ''.join(random.choices(characters, k=12))
+
+    report_file_path="./REPORTS/report_{}_vs_{}_{}.html".format(multiple_result_data[0]['model'],multiple_result_data[1]['model'],report_id)
+    with open(report_file_path, "w") as f:
+        f.write(report)
+
+    return report_file_path
+
+
 def get_args():
     # Get the script args
     parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
@@ -195,11 +254,24 @@ def main():
     with open('./RULES/owasp_top_10_for_llms.yaml', 'r') as f:
         rules = yaml.safe_load(f)
 
-    # Launching the scan 
-    result = scan(rules,config,args.tested_llm,args.checker_llm,args.owasp__llm_category)
 
-    # Generating a HTML report
-    report_file_path=get_report(result)
+    data=[]
+
+    # Launching the scan 
+    for tested_llm in args.tested_llm.split(','):
+        print("==========")
+        print(tested_llm)
+        print("==========")
+        if tested_llm!='':
+            result = scan(rules,config,tested_llm,args.checker_llm,args.owasp__llm_category)
+            data.append(result)
+
+    if len(data)==1:
+        # Generating a HTML report for a single model 
+        report_file_path=get_report(data[0])
+    else:
+        # Generating a report that compare 2 or more LLMs
+        report_file_path=get_compare_report(data)
 
     # open the report 
     subprocess.run(["open", report_file_path])
