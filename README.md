@@ -38,16 +38,18 @@ token:
 
 ```shell
 python promptsploit.py -h       
-usage: promptsploit.py [-h] -m TESTED_LLM [-c CHECKER_LLM] [-l LOGGING_LEVEL]
+usage: promptsploit.py [-h] -m TESTED_LLMS [-c CHECKER_LLM] [-o OWASP__LLM_CATEGORY] [-l LOGGING_LEVEL]
 
-Promptsploit help you check your LLM
+Promptsploit helps you checking your LLM against security and quality issues.
 
 options:
   -h, --help            show this help message and exit
-  -m, --tested_llm TESTED_LLM
-                        The LLM you want to assess for security vulnerabilities
+  -m, --tested_llms TESTED_LLMS
+                        The LLMs you want to assess for security vulnerabilities - provide a comma separated list
   -c, --checker_llm CHECKER_LLM
                         The LLM which will assess the responses of the tested LLM (llama3.2 by default)
+  -o, --owasp_llm_category OWASP_LLM_CATEGORY
+                        Scan for a specific OWASP for LLM category
   -l, --logging_level LOGGING_LEVEL
                         The level of log: OFF, INFO or DEBUG
 ```
@@ -56,6 +58,11 @@ This is an example of testing mistral model
 ```shell
 python promptsploit.py -m mistral -l OFF 
 ```
+This is an example of testing and comparing mistral and gpt-oss against "LLM01:2025 Prompt Injection"
+```shell
+python promptsploit.py -m "mistral,gpt-oss" -l INFO -c llama3.2 -o "LLM01:2025 Prompt Injection"
+```
+
 Note that the model you want to test and the checker model have to be declared in sessting.conf, here is an example:
 ```shell
 [mistral]

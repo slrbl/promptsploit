@@ -214,8 +214,8 @@ def get_compare_report(multiple_result_data):
 
 def get_args():
     # Get the script args
-    parser = argparse.ArgumentParser(description="Promptsploit help you check your LLM")
-    parser.add_argument('-m', '--tested_llm', help = 'The LLM you want to assess for security vulnerabilities', required = True)
+    parser = argparse.ArgumentParser(description="Promptsploit helps you checking your LLM against security and quality issues.")
+    parser.add_argument('-m', '--tested_llms', help = 'The LLMs you want to assess for security vulnerabilities - provide a comma separated list', required = True)
     parser.add_argument('-c', '--checker_llm', help = 'The LLM which will assess the responses of the tested LLM (llama3.2 by default)', default='llama3.2')
     parser.add_argument('-o', '--owasp__llm_category', help = 'Scan for a specific OWASP for LLM category', default='All')
     parser.add_argument('-l', '--logging_level', help = 'The level of log: OFF, INFO or DEBUG', default='INFO')
@@ -258,10 +258,7 @@ def main():
     data=[]
 
     # Launching the scan 
-    for tested_llm in args.tested_llm.split(','):
-        print("==========")
-        print(tested_llm)
-        print("==========")
+    for tested_llm in args.tested_llms.split(','):
         if tested_llm!='':
             result = scan(rules,config,tested_llm,args.checker_llm,args.owasp__llm_category)
             data.append(result)
