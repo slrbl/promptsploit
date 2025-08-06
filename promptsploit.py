@@ -29,7 +29,7 @@ def query_llm(config,llm,prompt):
         sys.exit(1)
 
     try:
-        response = requests.post(config[llm]['url'], json=data, timeout=60)
+        response = requests.post(config[llm]['url'], json=data, timeout=600)
         response.raise_for_status()
         response = response.json().get('response', '')
     except (requests.RequestException, ValueError) as e:
